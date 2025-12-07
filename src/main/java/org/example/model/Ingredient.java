@@ -1,7 +1,7 @@
 package org.example.model;
 
 public class Ingredient {
-    private String _id;
+    private String id;
     private String name;
     private String type;
     private int proteins;
@@ -11,12 +11,12 @@ public class Ingredient {
     private int price;
     private String image;
 
-    public String get_id() {
-        return _id;
+    public String getId() {
+        return id;
     }
 
-    public void set_id(String _id) {
-        this._id = _id;
+    public void setId(String _id) {
+        this.id = id;
     }
 
     public String getName() {

@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.apache.http.HttpStatus.*;
+import io.qameta.allure.Description;
 
 public class UserLoginTest extends BaseTest {
 
@@ -25,18 +27,19 @@ public class UserLoginTest extends BaseTest {
                 .setName(RandomStringUtils.randomAlphabetic(10));
         ValidatableResponse registerResponse = userSteps.createUser(user);
         int statusCode = registerResponse.extract().statusCode();
-        assertEquals(200, statusCode);
+        assertEquals(SC_OK, statusCode);
         userSteps.setAccessToken(userSteps.getAccessToken());
     }
 
     @Test
     @DisplayName("Успешная авторизация")
+    @Description("Проверяет успешную авторизацию пользователя с валидными email и паролем" + "Ожидается статус 200, success=true и корректные данные пользователя в ответе")
     public void loginSuccess() {
         ValidatableResponse registerResponse = userSteps.createUser(user);
         userSteps.setAccessToken(registerResponse.extract().path("accessToken"));
         ValidatableResponse loginResponse = userSteps.loginUser(user);
         loginResponse
-                .statusCode(200)
+                .statusCode(SC_OK)
                 .body("success", equalTo(true))
                 .body("user.email", equalTo(user.getEmail()))
                 .body("user.name", equalTo(user.getName()));
@@ -44,6 +47,7 @@ public class UserLoginTest extends BaseTest {
 
     @Test
     @DisplayName("Авторизация с неверным email")
+    @Description("Проверяет невозможность авторизации пользователя при вводе некорректного email" + "Система должна вернуть статус 401 и сообщение 'email or password are incorrect'")
     public void loginWithIncorrectEmail() {
         ValidatableResponse registerResponse = userSteps.createUser(user);
         userSteps.setAccessToken(registerResponse.extract().path("accessToken"));
@@ -53,13 +57,14 @@ public class UserLoginTest extends BaseTest {
                 .setPassword(user.getPassword());
         ValidatableResponse response = userSteps.loginUser(wrongEmailUser);
         response
-                .statusCode(401)
+                .statusCode(SC_UNAUTHORIZED)
                 .body("success", equalTo(false))
                 .body("message", equalTo("email or password are incorrect"));
     }
 
     @Test
     @DisplayName("Авторизация с неверным паролем")
+    @Description("Проверяет невозможность авторизации при использовании неверного пароля" + "Система должна вернуть статус 401 и сообщение 'email or password are incorrect'")
     public void loginWithIncorrectPassword() {
         ValidatableResponse registerResponse = userSteps.createUser(user);
         userSteps.setAccessToken(registerResponse.extract().path("accessToken"));
@@ -68,7 +73,7 @@ public class UserLoginTest extends BaseTest {
                 .setPassword("IncorrectPassword123");
         ValidatableResponse response = userSteps.loginUser(wrongPasswordUser);
         response
-                .statusCode(401)
+                .statusCode(SC_UNAUTHORIZED)
                 .body("success", equalTo(false))
                 .body("message", equalTo("email or password are incorrect"));
     }
@@ -78,7 +83,7 @@ public class UserLoginTest extends BaseTest {
         String token = userSteps.getAccessToken();
         if (token != null) {
             userSteps.deleteUser(token)
-                    .statusCode(202);
+                    .statusCode(SC_ACCEPTED);
         }
     }
 }
